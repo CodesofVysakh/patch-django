@@ -1,6 +1,9 @@
+import json
+
 from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
 from django.urls import reverse
+
 from web.models import Testimonial, Promoter, Faq, Subscribe
 
 
@@ -24,8 +27,23 @@ def index(request):
 
 def subscribe(request):
     email = request.POST.get("email")
-    Subscribe.objects.create(
-        email = email
-    )
 
-    return redirect(reverse("web:index"))
+    if not Subscribe.objects.filter(email=email).exists():
+
+        Subscribe.objects.create(
+            email = email
+        )
+
+        response_data = {
+            "status" : "success",
+            "title" : "Successfully Registered.",
+            "message" : "You subscribed to our newsletter successfully."
+        }
+    else:
+        response_data = {
+            "status" : "error",
+            "title" : "You are already Subscribed.",
+            "message" : "You are already a member. No need to register again."
+        }
+
+    return HttpResponse(json.dumps(response_data), content_type="application/javascript")
